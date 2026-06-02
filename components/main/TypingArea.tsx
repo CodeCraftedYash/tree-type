@@ -1,13 +1,9 @@
+import type { typedCharacters } from "@/types/typedChar.type";
 import { RefObject } from "react";
 
 type props = {
     words:string[];
-    typedCharacters:{
-        char: string;
-        expectedChar: string;
-        correct: boolean;
-        charIndex: number;
-        wordIndex: number;}[];
+    typedCharacters:typedCharacters[];
     currentWordIndex: number;
     currentCharacterIndex: number;
     activeCharRef: RefObject<HTMLSpanElement | null>;
