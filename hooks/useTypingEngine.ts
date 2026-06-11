@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-export default function useTypingEngine() {
+export default function useTypingEngine(isFinished:boolean,isStarted:boolean,start:()=>void) {
   const paragraph =
     "even if things do not go as you would hoped you can still enjoy the process that alone is enough to put someone in a good mood"
       .replace(/[’‘]/g, "'")
@@ -19,12 +19,7 @@ export default function useTypingEngine() {
       wordIndex: number;
     }[]
   >([]);
-  // timer
-  const timeLimit = 15;
-  const [timer, setTimer] = useState(timeLimit);
-  const [isStarted, setIsStarted] = useState(false);
-  const [isFinished, setIsFinished] = useState(false);
-
+  
   //engine
 
   useEffect(() => {
@@ -97,80 +92,25 @@ export default function useTypingEngine() {
         },
       ]);
       setCurrentCharacterIndex((prev) => prev + 1);
-      //timer
-      if (!isStarted) setIsStarted(true);
     };
     window.addEventListener("keydown", handleKeyDown);
-
+    start();
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
     };
   }, [currentCharacterIndex, currentWordIndex, isFinished, isStarted]);
 
-  // Timer
-
-  useEffect(() => {
-    if (!isStarted || isFinished) return;
-
-    const interval = setInterval(() => {
-      setTimer((prev) => {
-        if (prev <= 1) {
-          clearInterval(interval);
-
-          setIsFinished(true);
-          setIsStarted(false);
-
-          return 0;
-        }
-
-        return prev - 1;
-      });
-    }, 1000);
-
-    return () => clearInterval(interval);
-  }, [isStarted, isFinished]);
-
-  // Accuracy
-
-  const correctCharacters = typedCharacters.filter(
-    (item) => item.correct,
-  ).length;
-
-  const acc =
-    typedCharacters.length === 0
-      ? 0
-      : Math.round((correctCharacters / typedCharacters.length) * 100);
-
-  // WPM
-
-  const elapsedMinutes = (timeLimit - timer) / 60;
-
-  const wpm =
-    elapsedMinutes > 0 ? Math.round(correctCharacters / 5 / elapsedMinutes) : 0;
-
-  // Reset
-
-  function reset(e: React.MouseEvent<HTMLButtonElement>) {
-    console.log("reset hit");
-    if (e.currentTarget) {
-      e.currentTarget.blur();
-    }
-    setIsFinished(false);
-    setIsStarted(false);
-    setTimer(timeLimit);
-    setCurrentCharacterIndex(0);
-    setCurrentWordIndex(0);
-    setTypedCharacters([]);
-  }
+function resetTyping() {
+      setCurrentCharacterIndex(0);
+      setCurrentWordIndex(0);
+      setTypedCharacters([]);
+}
 
   return {
     words,
     currentCharacterIndex,
     currentWordIndex,
     typedCharacters,
-    timer,
-    acc,
-    wpm,
-    reset,
+    resetTyping
   };
 }
