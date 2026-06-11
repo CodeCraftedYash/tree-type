@@ -5,6 +5,8 @@ import Caret from "@/components/main/Caret";
 import Reset from "@/components/main/Reset";
 import Stats from "@/components/main/Stats";
 import TypingArea from "@/components/main/TypingArea";
+import useStats from "@/hooks/useStats";
+import useTimer from "@/hooks/useTimer";
 import useTypingEngine from "@/hooks/useTypingEngine";
 import { useLayoutEffect, useRef, useState } from "react";
 
@@ -12,9 +14,21 @@ export default function Home() {
   const [caretStyle, setCaretStyle] = useState({ left: 0, top: 0, height: 0 });
   const activeCharRef = useRef<HTMLSpanElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
+  const timeLimit = 15;
+  const {timer,isFinished,isStarted,resetTimer,start} = useTimer(timeLimit);
+  const {words,currentCharacterIndex,currentWordIndex,typedCharacters,resetTyping} = useTypingEngine(isFinished,isStarted,start);
+  const {acc,wpm} = useStats({typedCharacters,timer,timeLimit})
+   
+  // Reset
 
-  const {words,currentCharacterIndex,currentWordIndex,typedCharacters,timer,acc,wpm,reset} = useTypingEngine();
-
+  function reset(e: React.MouseEvent<HTMLButtonElement>) {
+    console.log("reset hit");
+    if (e.currentTarget) {
+      e.currentTarget.blur();
+    }
+    resetTimer();
+    resetTyping();
+  }
   // caret logic
   useLayoutEffect(() => {
     const activeLetter = activeCharRef.current;
