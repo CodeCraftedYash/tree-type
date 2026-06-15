@@ -8,26 +8,34 @@ import TypingArea from "@/components/main/TypingArea";
 import useStats from "@/hooks/useStats";
 import useTimer from "@/hooks/useTimer";
 import useTypingEngine from "@/hooks/useTypingEngine";
-import { useLayoutEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 
 export default function Home() {
   const [caretStyle, setCaretStyle] = useState({ left: 0, top: 0, height: 0 });
   const activeCharRef = useRef<HTMLSpanElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
   const timeLimit = 15;
-  const {timer,isFinished,isStarted,resetTimer,start} = useTimer(timeLimit);
-  const {words,currentCharacterIndex,currentWordIndex,typedCharacters,resetTyping} = useTypingEngine(isFinished,isStarted,start);
-  const {acc,wpm} = useStats({typedCharacters,timer,timeLimit})
+  const {timer, start, resetTimer,isRunning} = useTimer(timeLimit);
+  const {words,currentCharacterIndex,currentWordIndex,typedCharacters,resetTyping,finishTyping,correctCharacters,incorrectCharacters} = useTypingEngine(start);
+  const {acc,wpm} = useStats({ correctCharacters,
+  incorrectCharacters,
+  timer,
+  timeLimit,})
    
-  // Reset
+  // finish Typing
+   useEffect(() => {
+  if (timer === 0 && isRunning) {
+    finishTyping();
+  }
+}, [timer, isRunning]);
 
+  // Reset
   function reset(e: React.MouseEvent<HTMLButtonElement>) {
-    console.log("reset hit");
     if (e.currentTarget) {
       e.currentTarget.blur();
     }
-    resetTimer();
     resetTyping();
+    resetTimer();
   }
   // caret logic
   useLayoutEffect(() => {
