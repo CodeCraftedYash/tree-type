@@ -1,116 +1,134 @@
-import { useEffect, useState } from "react";
+import { initialTypingState } from "@/constants/initialTypingState";
+import { typingReducer } from "@/reducers/typingReducer";
+import { useEffect, useReducer } from "react";
 
-export default function useTypingEngine(isFinished:boolean,isStarted:boolean,start:()=>void) {
+export default function useTypingEngine(start: () => void) {
   const paragraph =
     "even if things do not go as you would hoped you can still enjoy the process that alone is enough to put someone in a good mood"
       .replace(/[’‘]/g, "'")
       .replace(/[“”]/g, '"')
       .replace(/\s+/g, " ")
       .trim();
-  const words = paragraph.split(" ");
-  const [currentCharacterIndex, setCurrentCharacterIndex] = useState(0);
-  const [currentWordIndex, setCurrentWordIndex] = useState(0);
-  const [typedCharacters, setTypedCharacters] = useState<
-    {
-      char: string;
-      expectedChar: string;
-      correct: boolean;
-      charIndex: number;
-      wordIndex: number;
-    }[]
-  >([]);
-  
-  //engine
 
+  const words = paragraph.split(" ");
+  const [state, dispatch] = useReducer(typingReducer, initialTypingState);
+
+  //engine
   useEffect(() => {
-    if (isFinished) return;
+    if (state.isFinished) return;
+
     function gotoNextWord() {
-      if (currentWordIndex >= words.length - 1) return;
-      setCurrentCharacterIndex(0);
-      setCurrentWordIndex((prev) => prev + 1);
+      if (state.currentWordIndex >= words.length - 1) return;
+      dispatch({ type: "NEXT_WORD" });
     }
+
     function gotoPreviousWord() {
-      const prevWord = currentWordIndex - 1;
-      setCurrentWordIndex(prevWord);
-      setCurrentCharacterIndex(words[prevWord].length - 1);
+      const previousWordLength = state.currentWordIndex - 1;
+      dispatch({
+        type: "PREVIOUS_WORD",
+        payload: { previousWordLength: words[previousWordLength].length },
+      });
     }
 
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (isFinished) return;
+      if (state.isFinished) return;
       const val = e.key;
       const expectedChar =
-        currentCharacterIndex < words[currentWordIndex].length
-          ? words[currentWordIndex][currentCharacterIndex]
+        state.currentCharacterIndex < words[state.currentWordIndex].length
+          ? words[state.currentWordIndex][state.currentCharacterIndex]
           : " ";
       const isCorrect = val === expectedChar;
+      const key = `${state.currentWordIndex}-${state.currentCharacterIndex}`;
 
       // handle backspace
       if (val === "Backspace") {
-        console.log("backspace hit");
-        if (currentCharacterIndex === 0 && currentWordIndex === 0) return;
-        setTypedCharacters((prev) => prev.slice(0, -1));
-        if (currentCharacterIndex === 0) gotoPreviousWord();
-        else setCurrentCharacterIndex((prev) => prev - 1);
+        if (state.currentCharacterIndex === 0 && state.currentWordIndex === 0)
+          return;
+        if (state.currentCharacterIndex > 0) {
+          const prevIndex = state.currentCharacterIndex - 1;
+          const prevKey = `${state.currentWordIndex}-${prevIndex}`;
+          dispatch({ type: "BACKSPACE", payload: { key: prevKey } });
+          return;
+        }
+
+        gotoPreviousWord();
         return;
       }
 
       // handle spacebar
       if (val === " ") {
-        console.log("spacebar hit");
-        if (currentCharacterIndex === words[currentWordIndex].length) {
+        if (
+          state.currentCharacterIndex === words[state.currentWordIndex].length
+        ) {
           gotoNextWord();
         } else {
-          setCurrentCharacterIndex((prev) => prev + 1);
-          setTypedCharacters((prev) => [
-            ...prev,
-            {
+          dispatch({
+            type: "TYPE_CHARACTER",
+            payload: {
               char: val,
-              charIndex: currentCharacterIndex,
               correct: isCorrect,
-              expectedChar,
-              wordIndex: currentWordIndex,
+              expectedChar: expectedChar,
+              key: key,
             },
-          ]);
+          });
         }
         return;
       }
 
+      //for keys like shift, control, alt, etc whose length is greater than 1
       if (val.length > 1) {
         return;
       }
-      if (currentCharacterIndex >= words[currentWordIndex].length) {
+
+      if (!state.isStarted) {
+        start(); // this will start the timer from the useTimer hook
+      }
+      
+      //for the very last character, this will prevent more entries if we are at the last charater of a word
+      if (state.currentCharacterIndex >= words[state.currentWordIndex].length) {
         return;
       }
-      setTypedCharacters((prev) => [
-        ...prev,
-        {
+
+      //adding normal characters
+      dispatch({
+        type: "TYPE_CHARACTER",
+        payload: {
           char: val,
-          charIndex: currentCharacterIndex,
           correct: isCorrect,
           expectedChar: expectedChar,
-          wordIndex: currentWordIndex,
+          key: key,
         },
-      ]);
-      setCurrentCharacterIndex((prev) => prev + 1);
+      });
     };
     window.addEventListener("keydown", handleKeyDown);
-    start();
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [currentCharacterIndex, currentWordIndex, isFinished, isStarted]);
+  }, [
+    state.currentCharacterIndex,
+    state.currentWordIndex,
+    state.isFinished,
+    state.isStarted,
+  ]);
 
-function resetTyping() {
-      setCurrentCharacterIndex(0);
-      setCurrentWordIndex(0);
-      setTypedCharacters([]);
-}
+  function resetTyping() {
+    dispatch({ type: "RESET" });
+  }
+
+  function finishTyping() {
+    dispatch({ type: "FINISHED" });
+  }
 
   return {
     words,
-    currentCharacterIndex,
-    currentWordIndex,
-    typedCharacters,
-    resetTyping
+    currentCharacterIndex: state.currentCharacterIndex,
+    currentWordIndex: state.currentWordIndex,
+    typedCharacters: state.typedCharacters,
+    correctCharacters: state.correctCharacters,
+    incorrectCharacters: state.incorrectCharacters,
+    isStarted: state.isStarted,
+    isFinished: state.isFinished,
+    resetTyping,
+    finishTyping,
   };
 }
