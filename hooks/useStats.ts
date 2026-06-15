@@ -1,28 +1,38 @@
-import { typedCharacters } from "@/types/typedChar.type";
+type Props = {
+  correctCharacters: number;
+  incorrectCharacters: number;
+  timer: number;
+  timeLimit: number;
+};
 
-type props = {
-    typedCharacters:typedCharacters[];
-    timer:number;
-    timeLimit:number;
-}
-export default function useStats({typedCharacters,timer,timeLimit}:props){
-  // Accuracy
-
-  const correctCharacters = typedCharacters.filter(
-    (item) => item.correct,
-  ).length;
+export default function useStats({
+  correctCharacters,
+  incorrectCharacters,
+  timer,
+  timeLimit,
+}: Props) {
+  const totalTyped =
+    correctCharacters + incorrectCharacters;
 
   const acc =
-    typedCharacters.length === 0
-      ? 0
-      : Math.round((correctCharacters / typedCharacters.length) * 100);
+    totalTyped > 0
+      ? Math.round(
+          (correctCharacters / totalTyped) * 100
+        )
+      : 100;
 
-  // WPM
-
-  const elapsedMinutes = (timeLimit - timer) / 60;
+  const elapsedMinutes =
+    (timeLimit - timer) / 60;
 
   const wpm =
-    elapsedMinutes > 0 ? Math.round(correctCharacters / 5 / elapsedMinutes) : 0;
+    elapsedMinutes > 0
+      ? Math.round(
+          correctCharacters / 5 / elapsedMinutes
+        )
+      : 0;
 
-    return { wpm, acc }
+  return {
+    acc,
+    wpm,
+  };
 }
