@@ -1,9 +1,9 @@
-import type { typedCharacters } from "@/types/typedChar.type";
+import type { TypedCharacter } from "@/types/typedChar.type";
 import { RefObject } from "react";
 
 type props = {
     words:string[];
-    typedCharacters:typedCharacters[];
+    typedCharacters:Map<string,TypedCharacter>;
     currentWordIndex: number;
     currentCharacterIndex: number;
     activeCharRef: RefObject<HTMLSpanElement | null>;
@@ -16,11 +16,7 @@ const TypingArea = ({words,typedCharacters,currentWordIndex,currentCharacterInde
           return (
             <div key={wordIndex} className="whitespace-nowrap">
               {word.split("").map((char, charIndex) => {
-                const typedCharacter = typedCharacters.find(
-                  (item) =>
-                    item.wordIndex === wordIndex &&
-                    item.charIndex === charIndex,
-                );
+                const typedCharacter = typedCharacters.get(`${wordIndex}-${charIndex}`);
 
                 const isCurrentChar =
                   currentWordIndex === wordIndex &&
