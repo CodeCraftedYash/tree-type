@@ -1,21 +1,19 @@
 import { useEffect, useState } from "react";
 
-export default function useTimer(timeLimit:number = 15) {
+export default function useTimer(
+  timeLimit: number = 15
+) {
   const [timer, setTimer] = useState(timeLimit);
-  const [isStarted, setIsStarted] = useState(false);
-  const [isFinished, setIsFinished] = useState(false);
+  const [isRunning, setIsRunning] =
+    useState(false);
 
-     // Timer
   useEffect(() => {
-    if (!isStarted || isFinished) return;
+    if (!isRunning) return;
+
     const interval = setInterval(() => {
-      setTimer((prev) => {
+      setTimer(prev => {
         if (prev <= 1) {
           clearInterval(interval);
-
-          setIsFinished(true);
-          setIsStarted(false);
-
           return 0;
         }
 
@@ -24,19 +22,21 @@ export default function useTimer(timeLimit:number = 15) {
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [isStarted, isFinished]);
-
-
-  function resetTimer (){
-    setIsFinished(false);
-    setIsStarted(false);
-    setTimer(timeLimit);
-  }
+  }, [isRunning]);
 
   function start() {
-  setIsStarted(true);
-}
+    setIsRunning(true);
+  }
 
-  return({timer, isStarted, isFinished, resetTimer,start});
+  function resetTimer() {
+    setTimer(timeLimit);
+    setIsRunning(false);
+  }
 
+  return {
+    timer,
+    start,
+    resetTimer,
+    isRunning
+  };
 }
