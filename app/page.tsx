@@ -1,6 +1,7 @@
 "use client";
 
 import Grid from "@/components/background/Grid";
+import Settings from "@/components/layout/Settings";
 import Caret from "@/components/main/Caret";
 import Reset from "@/components/main/Reset";
 import Stats from "@/components/main/Stats";
@@ -14,9 +15,9 @@ export default function Home() {
   const [caretStyle, setCaretStyle] = useState({ left: 0, top: 0, height: 0 });
   const activeCharRef = useRef<HTMLSpanElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
-  const timeLimit = 15;
-  const {timer, start, resetTimer,isRunning} = useTimer(timeLimit);
-  const {words,currentCharacterIndex,currentWordIndex,typedCharacters,resetTyping,finishTyping,correctCharacters,incorrectCharacters} = useTypingEngine(start);
+  const [timeLimit,setTimeLimit] = useState(15); 
+  const {timer, start, resetTimer,isRunning,handleTimeLimitChange} = useTimer(timeLimit,setTimeLimit);
+  const {words,currentCharacterIndex,currentWordIndex,typedCharacters,resetTyping,finishTyping,correctCharacters,incorrectCharacters,isFinished} = useTypingEngine(start);
   const {acc,wpm} = useStats({ correctCharacters,
   incorrectCharacters,
   timer,
@@ -27,7 +28,7 @@ export default function Home() {
   if (timer === 0 && isRunning) {
     finishTyping();
   }
-}, [timer, isRunning]);
+}, [timer, isRunning, isFinished]);
 
   // Reset
   function reset(e: React.MouseEvent<HTMLButtonElement>) {
@@ -61,7 +62,10 @@ export default function Home() {
   return (
     <div className="w-full relative h-full overflow-x-hidden grow">
 
-      <Stats timer={timer} acc={acc} wpm={wpm} />
+      <div className="flex w-full px-20">
+        <Stats timer={timer} acc={acc} wpm={wpm} />
+        <Settings timeLimit={timeLimit} isRunning={isRunning} handleTimeLimitChange={handleTimeLimitChange}/>
+      </div>
       <div
         ref={containerRef}
         className="w-2/3 mx-auto mt-20 text-4xl flex flex-wrap gap-x-3 relative">
