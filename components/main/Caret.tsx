@@ -9,7 +9,7 @@ type props = {
 const Caret = ({caretStyle}:props) => {
   return (
      <div
-          className="absolute w-[1.5px] scale-y-90 bg-yellow-400 animate-pulse transition-all duration-100"
+          className="absolute w-[1.5px] scale-y-90 bg-(--accent) animate-pulse transition-all duration-100"
           style={{
             left: `${caretStyle.left}px`,
             top: `${caretStyle.top}px`,
