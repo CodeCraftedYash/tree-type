@@ -15,7 +15,6 @@ const Character = memo(function Character({
   isCurrentChar,
   activeCharRef,
 }: Props) {
-    console.log(char);
   return (
     <span
       ref={isCurrentChar ? activeCharRef : null}
