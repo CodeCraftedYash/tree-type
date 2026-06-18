@@ -59,6 +59,10 @@ export function typingReducer(
     }
 
     case "FINISHED": {
+      if (state.isFinished) {
+        return state;
+      }
+
       return {
         ...state,
         isFinished: true,
