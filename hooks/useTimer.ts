@@ -1,7 +1,8 @@
-import { useEffect, useState } from "react";
+import { Dispatch, SetStateAction, useEffect, useState } from "react";
 
 export default function useTimer(
-  timeLimit: number = 15
+  timeLimit: number = 15,
+  setTimeLimit: Dispatch<SetStateAction<number>>
 ) {
   const [timer, setTimer] = useState(timeLimit);
   const [isRunning, setIsRunning] =
@@ -30,6 +31,13 @@ export default function useTimer(
 
   function resetTimer() {
     setTimer(timeLimit);
+    setTimeLimit(timeLimit);
+    setIsRunning(false);
+  }
+
+  function handleTimeLimitChange(limit:number){
+    setTimeLimit(limit)
+    setTimer(limit);
     setIsRunning(false);
   }
 
@@ -37,6 +45,7 @@ export default function useTimer(
     timer,
     start,
     resetTimer,
-    isRunning
+    isRunning,
+    handleTimeLimitChange
   };
 }
