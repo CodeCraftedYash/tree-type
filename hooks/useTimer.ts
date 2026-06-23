@@ -1,4 +1,4 @@
-import { Dispatch, SetStateAction, useEffect, useState } from "react";
+import { Dispatch, SetStateAction, useCallback, useEffect, useState } from "react";
 
 export default function useTimer(
   timeLimit: number = 15,
@@ -35,11 +35,11 @@ export default function useTimer(
     setIsRunning(false);
   }
 
-  function handleTimeLimitChange(limit:number){
+  const handleTimeLimitChange = useCallback((limit:number) => {
     setTimeLimit(limit)
     setTimer(limit);
     setIsRunning(false);
-  }
+  },[setIsRunning,setTimeLimit,setTimer]);
 
   return {
     timer,
