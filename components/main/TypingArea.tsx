@@ -1,5 +1,5 @@
 import type { TypedCharacter } from "@/types/typedChar.type";
-import { RefObject } from "react";
+import { memo, RefObject } from "react";
 import Character from "../layout/Character";
 
 type props = {
@@ -8,29 +8,33 @@ type props = {
   currentWordIndex: number;
   currentCharacterIndex: number;
   activeCharRef: RefObject<HTMLSpanElement | null>;
+  windowStart:number;
 };
-const TypingArea = ({
+const TypingArea = memo(function TypingArea({
   words,
   typedCharacters,
   currentWordIndex,
   currentCharacterIndex,
   activeCharRef,
-}: props) => {
+  windowStart
+}: props){
+  console.count("TypingArea rendered");
   return (
     <div
-      className="flex flex-wrap gap-x-3 relative"
+      className="flex flex-wrap gap-x-3 relative h-50 "
       style={{ fontSize: "var(--text-size)" }}
     >
       {words.map((word, wordIndex) => {
+        const realWordIndex = wordIndex + windowStart;
         return (
           <div key={wordIndex} className="whitespace-nowrap">
             {word.split("").map((char, charIndex) => {
               const typedCharacter = typedCharacters.get(
-                `${wordIndex}-${charIndex}`,
+                `${realWordIndex}-${charIndex}`,
               );
 
               const isCurrentChar =
-                currentWordIndex === wordIndex &&
+                currentWordIndex === realWordIndex &&
                 currentCharacterIndex === charIndex;
 
               return (
@@ -51,6 +55,6 @@ const TypingArea = ({
       })}
     </div>
   );
-};
+});
 
 export default TypingArea;
