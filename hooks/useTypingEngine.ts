@@ -1,22 +1,21 @@
 import { initialTypingState } from "@/constants/initialTypingState";
 import { typingReducer } from "@/reducers/typingReducer";
-import { useEffect, useReducer } from "react";
+import { useEffect, useMemo, useReducer } from "react";
+import useGetParagraph from "./useGetParagraph";
 
 export default function useTypingEngine(start: () => void) {
-  const paragraph =
-    "even if things do not go as you would hoped you can still enjoy the process that alone is enough to put someone in a good mood"
-      .replace(/[’‘]/g, "'")
-      .replace(/[“”]/g, '"')
-      .replace(/\s+/g, " ")
-      .trim();
-
-  const words = paragraph.split(" ");
+  const para = useGetParagraph()??"";
+  const paragraph = para
+    .toLowerCase()
+    .replace(/[^a-zA-Z\s]/g, "")
+    .replace(/\s+/g, " ")
+    .trim()
+  const words = useMemo(()=> paragraph ? paragraph.split(" ") : [],[paragraph])
   const [state, dispatch] = useReducer(typingReducer, initialTypingState);
 
   //engine
   useEffect(() => {
     if (state.isFinished) return;
-
     function gotoNextWord() {
       if (state.currentWordIndex >= words.length - 1) return;
       dispatch({ type: "NEXT_WORD" });
@@ -32,6 +31,7 @@ export default function useTypingEngine(start: () => void) {
 
     const handleKeyDown = (e: KeyboardEvent) => {
       if (state.isFinished) return;
+      if (words.length === 0) return;
       const val = e.key;
       const expectedChar =
         state.currentCharacterIndex < words[state.currentWordIndex].length
@@ -83,7 +83,7 @@ export default function useTypingEngine(start: () => void) {
       if (!state.isStarted) {
         start(); // this will start the timer from the useTimer hook
       }
-      
+
       //for the very last character, this will prevent more entries if we are at the last charater of a word
       if (state.currentCharacterIndex >= words[state.currentWordIndex].length) {
         return;
@@ -109,6 +109,7 @@ export default function useTypingEngine(start: () => void) {
     state.currentWordIndex,
     state.isFinished,
     state.isStarted,
+    words,
   ]);
 
   function resetTyping() {
