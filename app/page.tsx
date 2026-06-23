@@ -6,23 +6,25 @@ import Caret from "@/components/main/Caret";
 import Reset from "@/components/main/Reset";
 import Stats from "@/components/main/Stats";
 import TypingArea from "@/components/main/TypingArea";
+import useCaretPosition from "@/hooks/useCaretStyle";
 import useStats from "@/hooks/useStats";
 import useTimer from "@/hooks/useTimer";
 import useTypingEngine from "@/hooks/useTypingEngine";
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import useVisibleWords from "@/hooks/useVisibleWords";
+import { useEffect,useRef, useState } from "react";
 
 export default function Home() {
-  const [caretStyle, setCaretStyle] = useState({ left: 0, top: 0, height: 0 });
   const activeCharRef = useRef<HTMLSpanElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [timeLimit,setTimeLimit] = useState(15); 
   const {timer, start, resetTimer,isRunning,handleTimeLimitChange} = useTimer(timeLimit,setTimeLimit);
   const {words,currentCharacterIndex,currentWordIndex,typedCharacters,resetTyping,finishTyping,correctCharacters,incorrectCharacters,isFinished} = useTypingEngine(start);
+  const caretStyle = useCaretPosition({activeCharRef,containerRef,currentCharacterIndex,currentWordIndex})
   const {acc,wpm} = useStats({ correctCharacters,
   incorrectCharacters,
   timer,
-  timeLimit,})
-   
+  timeLimit,});
+  const {visibleWords,windowStart} = useVisibleWords({words,currentWordIndex})
   // finish Typing
    useEffect(() => {
   if (timer === 0 && isRunning) {
@@ -38,26 +40,6 @@ export default function Home() {
     resetTyping();
     resetTimer();
   }
-  // caret logic
-  useLayoutEffect(() => {
-    const activeLetter = activeCharRef.current;
-
-    const container = containerRef.current;
-
-    if (!activeLetter || !container) return;
-
-    const rect = activeLetter.getBoundingClientRect();
-
-    const containerRect = container.getBoundingClientRect();
-
-    setCaretStyle({
-      left: rect.left - containerRect.left,
-
-      top: rect.top - containerRect.top,
-
-      height: rect.height,
-    });
-  }, [currentCharacterIndex, currentWordIndex]);
 
   return (
     <div className="w-full relative h-full overflow-x-hidden grow">
@@ -68,10 +50,11 @@ export default function Home() {
       </div>
       <div
         ref={containerRef}
-        className="w-2/3 mx-auto mt-20 text-4xl flex flex-wrap gap-x-3 relative">
-        <Caret caretStyle={caretStyle}/>
-        {/* WORDS */}
-        <TypingArea words={words} typedCharacters={typedCharacters} currentWordIndex={currentWordIndex} currentCharacterIndex={currentCharacterIndex} activeCharRef={activeCharRef} />
+        className="w-2/3 mx-auto mt-20 text-4xl flex flex-wrap gap-x-3 relative select-none">
+        { visibleWords ? <div> 
+          <TypingArea words={visibleWords} windowStart={windowStart} typedCharacters={typedCharacters} currentWordIndex={currentWordIndex} currentCharacterIndex={currentCharacterIndex} activeCharRef={activeCharRef} />
+          <Caret caretStyle={caretStyle}/>
+        </div> : "Loading..."}
       </div>
        {/* Reset Button */}
         <div className=" mt-20 w-fit mx-auto"><Reset reset={reset}/></div>
