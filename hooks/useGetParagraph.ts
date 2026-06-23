@@ -11,7 +11,6 @@ export default function useGetParagraph() {
       }
     
       loadParagraph();
-      console.log("Paragraph fetched");
     }, []);
     return para;
 }
