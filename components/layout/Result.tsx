@@ -148,6 +148,7 @@ const Result = ({
           className="h-101.5 rounded-xl"
           autoPlay
           muted
+          preload="auto"
           onTimeUpdate={handleTimeUpdate}
           onClick={handleVideoClick}
         ></video>
