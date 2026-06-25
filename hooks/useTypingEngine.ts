@@ -4,7 +4,7 @@ import { useEffect, useMemo, useReducer } from "react";
 import useGetParagraph from "./useGetParagraph";
 
 export default function useTypingEngine(start: () => void) {
-  const para = useGetParagraph()??"";
+  const {para,fetchParagraph} = useGetParagraph()??"";
   const paragraph = para
     .toLowerCase()
     .replace(/[^a-zA-Z\s]/g, "")
@@ -131,5 +131,6 @@ export default function useTypingEngine(start: () => void) {
     isFinished: state.isFinished,
     resetTyping,
     finishTyping,
+    fetchParagraph
   };
 }
