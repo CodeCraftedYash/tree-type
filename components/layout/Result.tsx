@@ -3,6 +3,8 @@ import LineChart from "./LineChart";
 import { BsStars } from "react-icons/bs";
 import { HiOutlineLightBulb } from "react-icons/hi";
 import { GrLinkNext, GrPowerReset } from "react-icons/gr";
+import { useState } from "react";
+import Loading from "./Loading";
 type Props = {
   history: HistoryPoint[];
   correctCharacters: number;
@@ -26,6 +28,7 @@ const Result = ({
   reset,
   next,
 }: Props) => {
+  const [loading,setLoading] = useState(false);
   const handleTimeUpdate = (event: React.SyntheticEvent<HTMLVideoElement>) => {
     const video = event.currentTarget;
     if (video.paused) return;
@@ -143,6 +146,7 @@ const Result = ({
         ))}
       </div>
       <div className="flex  w-full h-fit items-start p-4 gap-5">
+        <div className="relative">
         <video
           src="https://res.cloudinary.com/dkoyvtbeq/video/upload/v1782285484/WhatsApp_Video_2026-06-23_at_5.47.08_PM_mowb9n.mp4"
           className="h-101.5 rounded-xl"
@@ -151,7 +155,10 @@ const Result = ({
           preload="auto"
           onTimeUpdate={handleTimeUpdate}
           onClick={handleVideoClick}
+          onLoadedData={()=>setLoading(true)}
         ></video>
+        {!loading && <Loading />}
+        </div>
         <div className="grow h-full rounded-xl flex flex-col gap-2">
           <LineChart history={history} />
           <div className="bg-[#181C26] p-2 rounded-xl">
