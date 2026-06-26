@@ -18,7 +18,6 @@ const TypingArea = memo(function TypingArea({
   activeCharRef,
   windowStart
 }: props){
-  console.count("TypingArea rendered");
   return (
     <div
       className="flex flex-wrap gap-x-3 relative h-50 "
