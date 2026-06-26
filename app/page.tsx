@@ -2,6 +2,7 @@
 
 import Blur from "@/components/background/Blur";
 import Grid from "@/components/background/Grid";
+import Loading from "@/components/layout/Loading";
 import Result from "@/components/layout/Result";
 import Settings from "@/components/layout/Settings";
 import Caret from "@/components/main/Caret";
@@ -36,6 +37,7 @@ export default function Home() {
     incorrectCharacters,
     isFinished,
     fetchParagraph,
+    loading
   } = useTypingEngine(start);
   const caretStyle = useCaretPosition({
     activeCharRef,
@@ -90,7 +92,7 @@ export default function Home() {
 
   return (
     <div className="w-full relative h-full overflow-x-hidden grow">
-      {isFinished && <Blur />}
+      {isFinished || loading && <Blur />}
       {isFinished && (
         <div className="absolute w-full h-[95%] top-0 left-0">
           <Result
@@ -115,7 +117,7 @@ export default function Home() {
         ref={containerRef}
         className="w-2/3 mx-auto mt-20 text-4xl flex flex-wrap gap-x-3 relative select-none"
       >
-        {visibleWords ? (
+        {visibleWords && 
           <div>
             <TypingArea
               words={visibleWords}
@@ -126,10 +128,9 @@ export default function Home() {
               activeCharRef={activeCharRef}
             />
             <Caret caretStyle={caretStyle} />
+            {loading && <Loading />}
           </div>
-        ) : (
-          "Loading..."
-        )}
+        }
       </div>
       <div className="flex items-center mt-32 w-fit mx-auto gap-10">
         <div className="w-fit mx-auto">
