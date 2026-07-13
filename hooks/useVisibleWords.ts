@@ -4,7 +4,7 @@ type Props = {
   words: string[];
   currentWordIndex: number;
 };
-// word is a full paragraph , we need to slice it based on current word index , 0->60, when at 40 : first + 20 , last + 20
+// word is a full paragraph , we need to slice it based on current word index , 0->60, when at 40 : first - 20 , last + 20
 
 export default function useVisibleWords({ words, currentWordIndex }: Props) {
   const WINDOW_SIZE = 34;
